@@ -1,0 +1,108 @@
+<template>
+    <div class="slds-card__header slds-card slds-grid">
+        <lightning-input type="file"
+                         label="Attachment"
+                         onchange={_showEditModal}
+                         multiple>
+        </lightning-input>
+    </div>
+
+    <div if:true={openModal}>
+        <section class="slds-modal slds-fade-in-open slds-modal_small">
+            <template if:true={_spinner}>
+                <lightning-spinner  alternative-text="Uploading" variant="brand" size="medium"></lightning-spinner>
+            </template>
+            <div class="slds-modal__container">
+                <header class="slds-modal__header">
+                    <button class="slds-button slds-button_icon slds-modal__close"
+                            title="Close" onclick={_closeModal}>
+                        <lightning-icon icon-name="utility:close" size="medium">
+                        </lightning-icon>
+                        <span class="slds-assistive-text">Close</span>
+                    </button>
+                    <h2 id="modal-heading-01" class="slds-text-heading_medium slds-hyphenate">New {currentFileName}</h2>
+                </header>
+                <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">
+                    <h3 class="slds-section__title slds-theme--shade slds-p-left--medium">Information</h3>
+                    <div class="slds-form-element_horizontal slds-is-editing">
+                        <div class="slds-col">
+                            <div class="slds-col slds-grid slds-has-flexi-truncate slds-p-vertical_medium slds-p-horizontal_x-large">
+                                <div class="slds-col slds-size_1-of-6 slds-text-body_regular">
+                                    <abbr title="required" class="slds-required">*</abbr><span>{objectInfo.data.fields.Title.label}</span>
+                                </div>
+                                <div class="slds-col slds-size_5-of-6 slds-text-body_regular">
+                                    <input type="text" id="cv_title" class="slds-input" value={currentFile.name}>
+                                </div>
+                            </div>
+                            <div class="slds-col slds-grid slds-has-flexi-truncate slds-p-vertical_medium slds-p-horizontal_x-large">
+                                <div class="slds-col slds-size_1-of-6 slds-text-body_regular">
+                                    <abbr title="required" class="slds-required">*</abbr><span>{objectInfo.data.fields.Type__c.label}</span>
+                                </div>
+                                <div class="slds-col slds-size_5-of-6 slds-text-body_regular">
+                                    <label>
+                                        <select class="slds-select" data-id="cv_type">
+                                            <template for:each={typePicklistValues.data.values} for:item="type">
+                                                <option key={type.label} value={type.value}>
+                                                    {type.label}
+                                                </option>
+                                            </template>
+                                        </select>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="slds-col slds-grid slds-has-flexi-truncate slds-p-vertical_medium slds-p-horizontal_x-large">
+                                <div class="slds-col slds-size_1-of-6 slds-text-body_regular">
+                                    <span>{objectInfo.data.fields.Description.label}</span>
+                                </div>
+                                <div class="slds-col slds-size_5-of-6 slds-text-body_regular">
+                                    <textarea name="descriptionArea" data-id="cv_description" rows="3" class="slds-textarea"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <footer class="slds-modal__footer">
+                    <lightning-button label="Cancel" variant="neutral" class="slds-p-horizontal--medium"
+                                      onclick={_closeModal}></lightning-button>
+                    <lightning-button label="Save" variant="brand" onclick={_saveFileAndShowNext} if:true={isLast}></lightning-button>
+                    <lightning-button label="Save & Next" variant="brand" onclick={_saveFileAndShowNext} if:false={isLast}></lightning-button>
+                </footer>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </div>
+
+    <div class="slds-card">
+        <div class="slds-card__header slds-grid slds-theme_shade list-last">
+            <header class="slds-media slds-media_center slds-has-flexi-truncate">
+                <div class="slds-media__figure">
+                    <lightning-icon size="small" icon-name="standard:file" alternative-text="close"></lightning-icon>
+                </div>
+                <div class="slds-media__body">
+                    <h2 class="slds-card__header-title">
+                        <span>Files</span>
+                    </h2>
+                </div>
+            </header>
+        </div>
+
+        <div class="slds-card__body">
+            <ul class="slds-m-around_medium">
+                <template iterator:it={_relatedFiles}>
+                    <li key={it.value.Id}>
+                        <ul>
+                            <li>{it.value.Title}</li>
+                            <li>{it.value.Type__c} {it.value.FileExtension}</li>
+                            <lightning-button-icon alternative-text="Preview" icon-name="utility:preview"
+                                                   value={it.value.ContentDocumentId}
+                                                   onclick={_filePreview}></lightning-button-icon>
+                            <lightning-button-icon alternative-text="Delete" icon-name="utility:delete"
+                                                   value={it.value.ContentDocumentId}
+                                                   onclick={_deleteFile}></lightning-button-icon>
+                        </ul>
+                    </li>
+                </template>
+            </ul>
+        </div>
+    </div>
+</template>
